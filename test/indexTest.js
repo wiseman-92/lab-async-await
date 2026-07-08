@@ -39,19 +39,31 @@ global.Node = dom.window.Node;
 global.Text = dom.window.Text;
 global.XMLHttpRequest = dom.window.XMLHttpRequest;
 
+const waitFor = (condition, timeout = 5000) => {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+    const check = () => {
+      if (condition()) return resolve();
+      if (Date.now() - start >= timeout) return reject(new Error('Timed out waiting for condition'));
+      setTimeout(check, 50);
+    };
+    check();
+  });
+};
+
 // Sample test suite for JavaScript event handling
 describe('Asynchronous Fetching ', () => {
   it('should fetch to external api and add information to page', async() => {
-    await new Promise(resolve => setTimeout(resolve, 200)); 
-    let postDisplay = document.querySelector("#post-list")
-    expect(postDisplay.innerHTML).to.include('sunt aut')
-    
-  })
+    await waitFor(() => document.querySelector('#post-list').children.length > 0);
+    let postDisplay = document.querySelector('#post-list');
+    expect(postDisplay.innerHTML).to.include('sunt aut');
+  });
+
   it('should create an h1 and p element to add', async() => {
-    await new Promise(resolve => setTimeout(resolve, 200)); 
-    let h1 = document.querySelector("h1")
-    let p = document.querySelector("p")
-    expect(h1.textContent).to.include("sunt aut facere repellat")
-    expect(p.textContent).to.include("quia et suscipit\nsuscipit")
-  })
-})
+    await waitFor(() => document.querySelector('h1'));
+    let h1 = document.querySelector('h1');
+    let p = document.querySelector('p');
+    expect(h1.textContent).to.include('sunt aut facere repellat');
+    expect(p.textContent).to.include('quia et suscipit\nsuscipit');
+  });
+});
